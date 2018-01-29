@@ -11,7 +11,7 @@ node {
         /* This builds the actual image; synonymous to
          * docker build on the command line */
 
-        app = docker.build("moises/hellonode")
+        app = docker.build("moisesmarangoni/test-scm")
     }
 
     stage('Test image') {
