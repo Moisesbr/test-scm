@@ -25,24 +25,20 @@ node {
 
     stage('Production') {
 	    if (env.BRANCH_NAME == "master") {
-	       	steps {	
-                input "Unleash this version to production?"
-                docker.withRegistry('https://registry.hub.docker.com', 'docker-hub-credentials') {
-                    app.push("${env.BUILD_NUMBER}")
-                    app.push("latest")
-                }
-	        }	
+            input "Unleash this version to production?"
+            docker.withRegistry('https://registry.hub.docker.com', 'docker-hub-credentials') {
+                app.push("${env.BUILD_NUMBER}")
+                app.push("latest")
+            }
 	    }
     }
 
     stage('Staging') {
 	    if (env.BRANCH_NAME == "master") {
-	       	steps {	
-                docker.withRegistry('https://registry.hub.docker.com', 'docker-hub-credentials') {
-                    app.push("${env.BUILD_NUMBER}")
-                    app.push("latest")
-                }
-	        }	
+            docker.withRegistry('https://registry.hub.docker.com', 'docker-hub-credentials') {
+                app.push("${env.BUILD_NUMBER}")
+                app.push("latest")
+            }
 	    }
     }
 }
