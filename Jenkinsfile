@@ -1,44 +1,41 @@
-node {
-    def app
+pipeline {
+	agent any
+	
+	stages {
+		stage('Unit test') {
+			steps {				
+ 			    sh 'echo "Tests passed"' // to ensure it is installed
+			}
+		}			
+		
+		stage('Integration test') {
+			steps {
+				sh 'echo "Tests passed integration"'			
+			}
+		}
 
-    stage('Clone repository') {
-        /* Let's make sure we have the repository cloned to our workspace */
+		stage('Staging') {
+			when {
+			   branch "hml"
+			}
+			steps {	
+				sh 'echo "deploy to staging"'		
+			}	
+		}		
+		
+	 	stage('Production') {
+			when {
+			   branch "master"
+			}
+			steps {	
+				sh 'echo "deploy to production"'		
+			}	
+		}
+	 }
+	
+	 environment {
+	 		AWS_ACCESS_KEY_ID = credentials('AWS_ACCESS_KEY_ID')
+			AWS_SECRET_ACCESS_KEY = credentials('AWS_SECRET_ACCESS_KEY')
+	 }
 
-        checkout scm
-    }
-
-    stage('Build image') {
-        /* This builds the actual image; synonymous to
-         * docker build on the command line */
-
-        app = docker.build("moisesmarangoni/test-scm")
-    }
-
-    stage('Test image') {
-        /* Ideally, we would run a test framework against our image.
-         * For this example, we're using a Volkswagen-type approach ;-) */
-
-        app.inside {
-            sh 'echo "Tests passed"'
-        }
-    }
-
-    stage('Production') {
-	    if (env.BRANCH_NAME == "master") {
-            input "Unleash this version to production?"
-            docker.withRegistry('https://registry.hub.docker.com', 'docker-hub-credentials') {
-                app.push("${env.BUILD_NUMBER}")
-                app.push("latest")
-            }
-	    }
-    }
-
-    stage('Staging') {
-	    if (env.BRANCH_NAME == "master") {
-            docker.withRegistry('https://registry.hub.docker.com', 'docker-hub-credentials') {
-                app.push("${env.BUILD_NUMBER}")
-                app.push("latest")
-            }
-	    }
-    }
-}
+} 
