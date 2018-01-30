@@ -24,9 +24,7 @@ node {
     }
 
     stage('Sanity check') {
-        steps {
-           input "Unleash this version to productio?"
-           }
+          input "Unleash this version to production?"
          }
 
     stage('Push image') {
