@@ -1,49 +1,53 @@
-pipeline {
-        agent any
-        stages { 
-                stage('Clone repository') {
-                    steps {
-                        checkout scm
-                    }
-                }
+node {
+    def app
 
-                stage('Build image and tests') {
-                    steps {
-                        def customImage
-                        customImage = docker.build("my-image:${env.BUILD_ID}")
-                    }
-                }
+    stage('Clone repository') {
+        /* Let's make sure we have the repository cloned to our workspace */
 
-                stage('Unit test') {
-                        steps {
-                            customImage.inside {
-                                sh 'make test'
-                            }
-                        }
-                }
-                /*stage('Unit test') {
-                        steps {
-                            sh 'npm run test' // to ensure it is installed
-                        }
-                }*/
+        checkout scm
+    }
 
-                stage('Staging') {
-                        when {
-                           branch "hml"
-                        }
-                        steps {
-                                sh 'echo "deploy to staging"'
-                        }
-                }
+    stage('Build image') {
+        /* This builds the actual image; synonymous to
+         * docker build on the command line */
 
-                stage('Production') {
-                        when {
-                           branch "master"
-                        }
-                        steps {
-                                sh 'echo "deploy to production"'
-                        }
-                }
-         }
+        app = docker.build("moisesmarangoni/test-scm")
+    }
 
+    stage('Test image') {
+        /* Ideally, we would run a test framework against our image.
+         * For this example, we're using a Volkswagen-type approach ;-) */
+
+        app.inside {
+            sh 'echo "Tests passed"'
+        }
+    }
+
+    stage('Staging') {
+            when {
+               branch "hml"
+            }
+            steps {
+                    sh 'echo "deploy to staging"'
+            }
+    
+    stage('Production') {
+            when {
+               branch "master"
+            }
+            steps {
+                    sh 'echo "deploy to production"'
+            }
+    }
+
+    stage('Push image') {
+        /* Finally, we'll push the image with two tags:
+         * First, the incremental build number from Jenkins
+         * Second, the 'latest' tag.
+         * Pushing multiple tags is cheap, as all the layers are reused. */
+        docker.withRegistry('https://registry.hub.docker.com', 'docker-hub-credentials') {
+            app.push("${env.BUILD_NUMBER}")
+            app.push("latest")
+        }
+    }
 }
