@@ -2,12 +2,16 @@ pipeline {
         agent any
         stages { 
                 stage('Clone repository') {
-                    checkout scm
+                    steps {
+                        checkout scm
+                    }
                 }
 
-                stage('Build image') {
-                    def customImage
-                    customImage = docker.build("my-image:${env.BUILD_ID}")
+                stage('Build image and tests') {
+                    steps {
+                        def customImage
+                        customImage = docker.build("my-image:${env.BUILD_ID}")
+                    }
                 }
 
                 stage('Unit test') {
