@@ -30,7 +30,8 @@ node {
             steps {
                     sh 'echo "deploy to staging"'
             }
-    
+    }
+
     stage('Production') {
             when {
                branch "master"
