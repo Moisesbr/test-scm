@@ -1,8 +1,7 @@
 pipeline {
         agent any
-        def customImage
-
         stages {
+                def customImage
                 stage('Clone repository') {
                     checkout scm
                 }
